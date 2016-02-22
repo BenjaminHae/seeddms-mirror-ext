@@ -1,29 +1,29 @@
 <?php
-$EXT_CONF['example'] = array(
-	'title' => 'Example Extension',
-	'description' => 'This sample extension demonstrate the use of various hooks',
+$EXT_CONF['export'] = array(
+	'title' => 'Export Extension',
+	'description' => 'This extension exports all documents to a folder for syncing',
 	'disable' => false,
 	'version' => '1.0.0',
-	'releasedate' => '2013-05-03',
-	'author' => array('name'=>'Uwe Steinmann', 'email'=>'uwe@steinmann.cx', 'company'=>'MMK GmbH'),
+	'releasedate' => '2016-02-22',
+	'author' => array('name'=>'Benjamin Häublein', 'email'=>'benjaminhaeublein@gmail.com', 'company'=>''),
 	'config' => array(
 		'input_field' => array(
-			'title'=>'Example input field',
+			'title'=>'Export folder',
 			'type'=>'input',
 			'size'=>20,
 		),
-		'checkbox' => array(
-			'title'=>'Example check box',
-			'type'=>'checkbox',
-		),
+//		'checkbox' => array(
+//			'title'=>'Example check box',
+//			'type'=>'checkbox',
+//		),
 	),
 	'constraints' => array(
-		'depends' => array('php' => '5.4.4-', 'seeddms' => '4.3.0-'),
+		'depends' => array('php' => '5.4.4-', 'seeddms' => '5.0.0-'),
 	),
 	'icon' => 'icon.png',
 	'class' => array(
-		'file' => 'class.example.php',
-		'name' => 'SeedDMS_ExtExample'
+		'file' => 'class.export.php',
+		'name' => 'SeedDMS_ExtExport'
 	),
 	'language' => array(
 		'file' => 'lang.php',
