@@ -24,13 +24,15 @@
 
 
 /**
- * Example extension
+ * Extension to export files into a directory structure
  *
- * @author  Uwe Steinmann <uwe@steinmann.cx>
+ * @author  Benjamin Haeublein <benjaminhaeublein@gmail.com>
  * @package SeedDMS
- * @subpackage  example
+ * @subpackage  Mirror
  */
-class SeedDMS_ExtExample extends SeedDMS_ExtBase {
+class SeedDMS_ExtMirror extends SeedDMS_ExtBase {
+    
+    var $_handler = new SeedDMS_ExtMirror_Handler();
 
 	/**
 	 * Initialization
@@ -46,14 +48,20 @@ class SeedDMS_ExtExample extends SeedDMS_ExtBase {
 	 * $GLOBALS['SEEDDMS_HOOKS'] : all hooks added so far
 	 */
 	function init() { /* {{{ */
-		$GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_ExtExample_AddDocument;
-		$GLOBALS['SEEDDMS_HOOKS']['view']['viewFolder'][] = new SeedDMS_ExtExample_ViewFolder;
+		$GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_ExtMirror_AddDocument($this->_handler);
 	} /* }}} */
 
 	function main() { /* {{{ */
 	} /* }}} */
 }
 
+class SeedDMS_ExtMirror_HookBase {
+    var $_handler;
+
+	function SeedDMS_ExtMirror_HookBase($handler) { /* {{{ */
+        $this->_handler = $handler;
+    }
+}
 /**
  * Class containing methods for hooks when a document is added
  *
@@ -61,55 +69,156 @@ class SeedDMS_ExtExample extends SeedDMS_ExtBase {
  * @package SeedDMS
  * @subpackage  example
  */
-class SeedDMS_ExtExample_AddDocument {
-
-	/**
-	 * Hook before adding a new document
-	 */
-	function preAddDocument($view) { /* {{{ */
-	} /* }}} */
+class SeedDMS_ExtMirror_AddDocument extends SeedDMS_ExtMirror_HookBase{
 
 	/**
 	 * Hook after successfully adding a new document
+     * Adds it to the mirror directory
 	 */
-	function postAddDocument($view) { /* {{{ */
+	function postAddDocument($document) { /* {{{ */
+        $this->handler($document);
 	} /* }}} */
 }
 
-/**
- * Class containing methods for hooks when a folder view is ѕhown
- *
- * @author  Uwe Steinmann <uwe@steinmann.cx>
- * @package SeedDMS
- * @subpackage  example
- */
-class SeedDMS_ExtExample_ViewFolder {
-
+class SeedDMS_ExtMirror_Handler {
 	/**
-	 * Hook when showing a folder
-	 *
-	 * The returned string will be output after the object menu and before
-	 * the actual content on the page
-	 *
-	 * @param object $view the current view object
-	 * @return string content to be output
+	 * @const bool if true in the mirror directory every file from the DMS is inside another folder
 	 */
-	function preContent($view) { /* {{{ */
-		return $view->infoMsg("Content created by viewFolder::preContent hook.");
-	} /* }}} */
-
+	const _ROOTCONTAINSMAINFOLDER = false;
 	/**
-	 * Hook when showing a folder
-	 *
-	 * The returned string will be output at the end of the content area
-	 *
-	 * @param object $view the current view object
-	 * @return string content to be output
+	 * @const string name of attribute which decides whether a file should be in repo 
 	 */
-	function postContent($view) { /* {{{ */
-		return $view->infoMsg("Content created by viewFolder::postContent hook");
-	} /* }}} */
+	const _REPOATTRIBUTE = "ignoreInGit";
+	/**
+	 * @const string pipe for shell_exec
+	 */
+	const _PIPE = " 2>&1";
+	/**
+	 * @const bool be verbose in log for debugging
+	 */
+	const _VERBOSE = true;
+	
+	/**
+	 * @var string path of mirror directory, including trailing path delimiter
+	 *
+	 * @access protected
+	 */
+	var $_path;
 
+	private function Attribute(){
+	  if ($this->_attributObject == NULL){
+	    $this->_attributObject = $this->_dms->getAttributeDefinitionByName(self::_REPOATTRIBUTE);
+	  }
+	  return $this->_attributObject;
+	}
+
+	function addDocumentContent($document){//todo: alter content bleibt beibehalten, wenn sich Dateityp ändert
+		if (!$this->belongsFileToRepository($document)){
+			$this->log($this->DocumentGetCorePath($document)." is set to ignoreInGit");
+			return false;
+		}
+		$destinationPath = $this->DocumentGetGitPath($document);
+		$this->forceDirectories($destinationPath);
+		$this->log("Adding Document ".$document->getName());
+		if (file_exists($destinationPath)){		
+			$this->log("copying file ".$this->DocumentGetCorePath($document)." to ".$this->DocumentGetGitFullPath($document));
+			if (copy($this->DocumentGetCorePath($document),$this->DocumentGetGitFullPath($document))){
+				$this->gitAdd($this->DocumentGetGitFullPath($document));
+				$this->_gitCommitMessage .= "added File ".$document->getName()."\r\n";
+				return true;
+			}
+			else{
+				$this->log(print_r(error_get_last(), true), PEAR_LOG_ERR);
+			}
+		}
+		else{
+				$this->log("addDocumentContent: destinationPath doesn't exist", PEAR_LOG_ERR);
+		}
+		return false;
+	}
+	function endsWith($haystack, $needle){
+		return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+	}
+	
+	function DocumentGetGitPath($document){
+		return $this->FolderGetGitFullPath($document->getFolder());
+	}
+	
+	function DocumentGetGitFileName($document, $latestContent=NULL){
+		return $this->DocumentGetGitFileNameX($document->getName(),$document,$latestContent);
+	}
+	
+	function DocumentGetGitFileNameX($name, $document, $latestContent=NULL){
+		if($latestContent==NULL)
+			$latestContent = $document->getLatestContent();
+		//Independent of case
+		if ($this->endsWith(strtolower($name), strtolower($latestContent->getFileType())))
+			return $name;
+		return $name.$latestContent->getFileType();
+	}
+	
+	function DocumentGetGitFullPath($document, $latestContent=NULL){
+		return $this->DocumentGetGitPath($document).'/'.$this->DocumentGetGitFileName($document,$latestContent);
+	}
+	
+	function DocumentGetCorePath($document){
+		$latestContent = $document->getLatestContent();
+		if (is_object($latestContent))
+			return $this->_dms->contentDir.$latestContent->getPath();
+		else
+			return false;
+	}
+	
+	function FolderGetGitFullPath($folder){
+		return $this->_path.$this->FolderGetRelativePath($folder);
+	}
+	
+	function FolderGetRelativePath($folder){
+		$path="";
+		$folderPath = $folder->getPath();
+		$start = 0;
+		if(!self::_ROOTCONTAINSMAINFOLDER)
+			$start = 1;
+		for ($i = 1; $i < count($folderPath); $i++) {
+			$path .= $folderPath[$i]->getName();
+			if ($i +1 < count($folderPath)){
+				$path .= "/";
+			}
+		}
+		//printf($folderPath);
+		return $path;
+	}
+	function belongsFileToRepository($document){
+	  if ($document->getAttributeValue($this->Attribute()) == "true")
+	    return false;
+	  $curr = $document->getFolder();
+	  return $this->belongsFolderToRepository($curr);
+	}
+	
+	function belongsFolderToRepository($folder){
+	  $curr = $folder;
+	  while (true){
+	    if (!$curr)
+	      break;
+	    if ($curr->getAttributeValue($this->Attribute()) == "true")
+	      return false;
+	    if (!isset($curr->_parentID) || ($curr->_parentID == "") || ($curr->_parentID == 0) || ($curr->_id == $curr->_dms->rootFolderID)) 
+	      break;
+	    $curr = $curr->getParent();
+	  }
+	  return true;
+	}	
+	private function log($msg, $priority = null){
+		global $logger;
+		if(trim($msg)!=""){
+			if(is_object($logger))
+				$logger->log("Git"." (".$_SERVER['REMOTE_ADDR'].") ".basename($_SERVER["REQUEST_URI"], ".php")." ".$msg, $priority);
+		}
+	}
+	function forceDirectories($path){
+		if (!file_exists($path)) {
+			mkdir($path, 0777, true);//ToDo Berechtigungen
+		}
+	}
 }
-
 ?>
