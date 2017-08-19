@@ -30,9 +30,10 @@
  * @package SeedDMS
  * @subpackage  Mirror
  */
-class SeedDMS_ExtMirror extends SeedDMS_ExtBase {
+class SeedDMS_FileMirror extends SeedDMS_ExtBase {
     
-    var $_handler = new SeedDMS_ExtMirror_Handler();
+    var $_documentHandler = new SeedDMS_FileMirror_DocumentHandler();
+    var $_fileHandler = new SeedDMS_FileMirror_FileHandler();
 
 	/**
 	 * Initialization
@@ -48,17 +49,17 @@ class SeedDMS_ExtMirror extends SeedDMS_ExtBase {
 	 * $GLOBALS['SEEDDMS_HOOKS'] : all hooks added so far
 	 */
 	function init() { /* {{{ */
-		$GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_ExtMirror_AddDocument($this->_handler);
+		$GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_handler);
 	} /* }}} */
 
 	function main() { /* {{{ */
 	} /* }}} */
 }
 
-class SeedDMS_ExtMirror_HookBase {
+class SeedDMS_FileMirror_HookBase {
     var $_handler;
 
-	function SeedDMS_ExtMirror_HookBase($handler) { /* {{{ */
+	function __construct($handler) {
         $this->_handler = $handler;
     }
 }
@@ -69,18 +70,18 @@ class SeedDMS_ExtMirror_HookBase {
  * @package SeedDMS
  * @subpackage  example
  */
-class SeedDMS_ExtMirror_AddDocument extends SeedDMS_ExtMirror_HookBase{
+class SeedDMS_FileMirror_AddDocument extends SeedDMS_FileMirror_HookBase{
 
 	/**
 	 * Hook after successfully adding a new document
      * Adds it to the mirror directory
 	 */
-	function postAddDocument($document) { /* {{{ */
-        $this->handler($document);
-	} /* }}} */
+	function postAddDocument($document) {
+        $this->handler.addDocument($document);
+	}
 }
 
-class SeedDMS_ExtMirror_Handler {
+class SeedDMS_FileMirror_DocumentHandler {
 	/**
 	 * @const bool if true in the mirror directory every file from the DMS is inside another folder
 	 */
@@ -220,5 +221,12 @@ class SeedDMS_ExtMirror_Handler {
 			mkdir($path, 0777, true);//ToDo Berechtigungen
 		}
 	}
+}
+
+class SeedDMS_FileMirror_FileHandler {
+    var $_path;
+    function __construct($path) {
+        $this->_path = $path;
+    }
 }
 ?>
