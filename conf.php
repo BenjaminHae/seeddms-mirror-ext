@@ -7,7 +7,7 @@ $EXT_CONF['export'] = array(
 	'releasedate' => '2017-08-21',
 	'author' => array('name'=>'Benjamin Häublein', 'email'=>'benjaminhaeublein@gmail.com', 'company'=>''),
 	'config' => array(
-		'input_field' => array(
+		'mirrorPath' => array(
 			'title'=>'Export folder',
 			'type'=>'input',
 			'size'=>20,
