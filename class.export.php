@@ -33,7 +33,6 @@
 class SeedDMS_FileMirror extends SeedDMS_ExtBase {
     
     var $_documentHandler;
-    var $_fileHandler;
     var $_mirrorPath;
 
 	/**
@@ -50,10 +49,13 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
 	 * $GLOBALS['SEEDDMS_HOOKS'] : all hooks added so far
 	 */
 	function init() { /* {{{ */
-        $this->_mirrorPath = '';
-        $this->_fileHandler = new SeedDMS_FileMirror_FileHandler($this->_mirrorPath);
-        $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($this->_fileHandler);
+        $this->_mirrorPath = '/var/local/seeddms/mirror';
+        $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($this->_mirrorPath);
 		$GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
+		$GLOBALS['SEEDDMS_HOOKS']['view']['removeDocument'][] = new SeedDMS_FileMirror_RemoveDocument($this->_documentHandler);
+		$GLOBALS['SEEDDMS_HOOKS']['view']['updateDocument'][] = new SeedDMS_FileMirror_UpdateDocument($this->_documentHandler);
+		$GLOBALS['SEEDDMS_HOOKS']['view']['removeFolder'][] = new SeedDMS_FileMirror_RemoveFolder($this->_documentHandler);
+		$GLOBALS['SEEDDMS_HOOKS']['view']['editFolder'][] = new SeedDMS_FileMirror_EditFolder($this->_documentHandler);
 	} /* }}} */
 
 	function main() { /* {{{ */
@@ -67,23 +69,41 @@ class SeedDMS_FileMirror_HookBase {
         $this->_handler = $handler;
     }
 }
-/**
- * Class containing methods for hooks when a document is added
- *
- * @author  Uwe Steinmann <uwe@steinmann.cx>
- * @package SeedDMS
- * @subpackage  example
- */
+/* Classes for Handling Document Hooks */
 class SeedDMS_FileMirror_AddDocument extends SeedDMS_FileMirror_HookBase{
-
-	/**
-	 * Hook after successfully adding a new document
-     * Adds it to the mirror directory
-	 */
 	function postAddDocument($document) {
-        $this->handler.addDocument($document);
+        $this->handler->addDocumentContent($document);
 	}
 }
+class SeedDMS_FileMirror_RemoveDocument extends SeedDMS_FileMirror_HookBase{
+	function preRemoveDocument($document) {
+        $this->handler->removeDocument($document);
+	}
+}
+class SeedDMS_FileMirror_UpdateDocument extends SeedDMS_FileMirror_HookBase{
+	function preUpdateDocument($document) {
+        //$this->handler->removeDocument($document);
+	}
+	function postUpdateDocument($document) {
+        //$this->handler->removeDocument($document);
+	}
+}
+/* Classes for Handling Folder Hooks */
+class SeedDMS_FileMirror_RemoveFolder extends SeedDMS_FileMirror_HookBase{
+	function preRemoveFolder($folder) {
+        $this->handler->removeFolder($folder);
+	}
+}
+class SeedDMS_FileMirror_EditFolder extends SeedDMS_FileMirror_HookBase{
+	function preEditFolder($folder) {
+        //$this->handler->removeDocument($folder);
+	}
+	function postEditFolder($folder) {
+        //$this->handler->removeDocument($folder);
+	}
+}
+
+/* Document Handler Class for copying, removing and renaming document */
 
 class SeedDMS_FileMirror_DocumentHandler {
 	/**
@@ -95,10 +115,6 @@ class SeedDMS_FileMirror_DocumentHandler {
 	 */
 	const _REPOATTRIBUTE = "ignoreInGit";
 	/**
-	 * @const string pipe for shell_exec
-	 */
-	const _PIPE = " 2>&1";
-	/**
 	 * @const bool be verbose in log for debugging
 	 */
 	const _VERBOSE = true;
@@ -109,6 +125,10 @@ class SeedDMS_FileMirror_DocumentHandler {
 	 * @access protected
 	 */
 	var $_path;
+
+    function __construct($path){
+        $this->_path = $path;
+    }
 
 	private function Attribute(){
 	  if ($this->_attributObject == NULL){
@@ -125,11 +145,11 @@ class SeedDMS_FileMirror_DocumentHandler {
 		$destinationPath = $this->DocumentGetGitPath($document);
 		$this->forceDirectories($destinationPath);
 		$this->log("Adding Document ".$document->getName());
-		if (file_exists($destinationPath)){		
-			$this->log("copying file ".$this->DocumentGetCorePath($document)." to ".$this->DocumentGetGitFullPath($document));
-			if (copy($this->DocumentGetCorePath($document),$this->DocumentGetGitFullPath($document))){
-				$this->gitAdd($this->DocumentGetGitFullPath($document));
-				$this->_gitCommitMessage .= "added File ".$document->getName()."\r\n";
+		if (file_exists($destinationPath)){
+            $destination = $this->DocumentGetGitFullPath($document);
+			$this->log("copying file ".$this->DocumentGetCorePath($document)." to ".$destination);
+			if (copy($this->DocumentGetCorePath($document),$destination)){
+                chmod($destination, 0770);
 				return true;
 			}
 			else{
@@ -141,6 +161,30 @@ class SeedDMS_FileMirror_DocumentHandler {
 		}
 		return false;
 	}
+
+	function removeDocument($document){
+		if (!$this->belongsFileToRepository($document)){
+			$this->log($this->DocumentGetCorePath($document)." is set to ignoreInGit");
+			return false;
+		}
+		unlink($this->DocumentGetGitFullPath($document));
+		return true;
+	}
+
+	function removeFolder($folder){
+		if (!$this->belongsFolderToRepository($folder)){
+			$this->log($this->DocumentGetCorePath($folder)." is set to ignoreInGit");
+			return false;
+		}
+		if(unlink($this->FolderGetGitFullPath($folder))){
+			return true;
+		}
+		else{
+			$this->log(print_r(error_get_last(), true), PEAR_LOG_ERR);
+		}
+		return false;
+	}
+
 	function endsWith($haystack, $needle){
 		return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 	}
@@ -149,21 +193,20 @@ class SeedDMS_FileMirror_DocumentHandler {
 		return $this->FolderGetGitFullPath($document->getFolder());
 	}
 	
-	function DocumentGetGitFileName($document, $latestContent=NULL){
-		return $this->DocumentGetGitFileNameX($document->getName(),$document,$latestContent);
+	function DocumentGetGitFileName($document){
+		return $this->DocumentGetGitFileNameX($document->getName(),$document);
 	}
 	
-	function DocumentGetGitFileNameX($name, $document, $latestContent=NULL){
-		if($latestContent==NULL)
-			$latestContent = $document->getLatestContent();
+	function DocumentGetGitFileNameX($name, $document){
+	    $latestContent = $document->getLatestContent();
 		//Independent of case
 		if ($this->endsWith(strtolower($name), strtolower($latestContent->getFileType())))
 			return $name;
 		return $name.$latestContent->getFileType();
 	}
 	
-	function DocumentGetGitFullPath($document, $latestContent=NULL){
-		return $this->DocumentGetGitPath($document).'/'.$this->DocumentGetGitFileName($document,$latestContent);
+	function DocumentGetGitFullPath($document){
+		return $this->DocumentGetGitPath($document).'/'.$this->DocumentGetGitFileName($document);
 	}
 	
 	function DocumentGetCorePath($document){
@@ -222,15 +265,8 @@ class SeedDMS_FileMirror_DocumentHandler {
 	}
 	function forceDirectories($path){
 		if (!file_exists($path)) {
-			mkdir($path, 0777, true);//ToDo Berechtigungen
+			mkdir($path, 0770, true);
 		}
 	}
-}
-
-class SeedDMS_FileMirror_FileHandler {
-    var $_path;
-    function __construct($path) {
-        $this->_path = $path;
-    }
 }
 ?>
