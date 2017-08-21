@@ -34,6 +34,7 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
     
     var $_documentHandler = new SeedDMS_FileMirror_DocumentHandler();
     var $_fileHandler = new SeedDMS_FileMirror_FileHandler();
+    var $_mirrorPath = '';
 
 	/**
 	 * Initialization
@@ -49,6 +50,7 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
 	 * $GLOBALS['SEEDDMS_HOOKS'] : all hooks added so far
 	 */
 	function init() { /* {{{ */
+        echo $GLOBALS['settings']['_extensions']['export'];
 		$GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_handler);
 	} /* }}} */
 

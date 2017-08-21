@@ -3,8 +3,8 @@ $EXT_CONF['export'] = array(
 	'title' => 'Export Extension',
 	'description' => 'This extension exports all documents to a folder for syncing',
 	'disable' => false,
-	'version' => '1.0.0',
-	'releasedate' => '2016-02-22',
+	'version' => '0.0.1',
+	'releasedate' => '2017-08-21',
 	'author' => array('name'=>'Benjamin Häublein', 'email'=>'benjaminhaeublein@gmail.com', 'company'=>''),
 	'config' => array(
 		'input_field' => array(
