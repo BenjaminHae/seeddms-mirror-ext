@@ -261,6 +261,8 @@ class SeedDMS_FileMirror_DocumentHandler {
 		if(trim($msg)!=""){
 			if(is_object($logger))
 				$logger->log("Git"." (".$_SERVER['REMOTE_ADDR'].") ".basename($_SERVER["REQUEST_URI"], ".php")." ".$msg, $priority);
+            else
+                error_log("seeddms"."Git"." (".$_SERVER['REMOTE_ADDR'].") ".basename($_SERVER["REQUEST_URI"], ".php")." ".$msg);
 		}
 	}
 	function forceDirectories($path){
