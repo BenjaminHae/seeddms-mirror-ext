@@ -52,8 +52,8 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
 	function init() { /* {{{ */
         $this->_mirrorPath = '';
         $this->_fileHandler = new SeedDMS_FileMirror_FileHandler($this->_mirrorPath);
-        $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler();
-		$GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_handler);
+        $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($this->_fileHandler);
+		$GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
 	} /* }}} */
 
 	function main() { /* {{{ */
