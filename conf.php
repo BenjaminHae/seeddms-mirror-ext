@@ -23,7 +23,7 @@ $EXT_CONF['export'] = array(
 	'icon' => 'icon.png',
 	'class' => array(
 		'file' => 'class.export.php',
-		'name' => 'SeedDMS_ExtExport'
+		'name' => 'SeedDMS_FileMirror'
 	),
 	'language' => array(
 		'file' => 'lang.php',
