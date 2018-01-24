@@ -52,11 +52,11 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
         $settings = $GLOBALS['settings']['_extensions']['export'];
         $this->_mirrorPath = '/var/local/seeddms/mirror';
         $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($this->_mirrorPath);
-        $GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
-        $GLOBALS['SEEDDMS_HOOKS']['view']['removeDocument'][] = new SeedDMS_FileMirror_RemoveDocument($this->_documentHandler);
-        $GLOBALS['SEEDDMS_HOOKS']['view']['updateDocument'][] = new SeedDMS_FileMirror_UpdateDocument($this->_documentHandler);
-        $GLOBALS['SEEDDMS_HOOKS']['view']['removeFolder'][] = new SeedDMS_FileMirror_RemoveFolder($this->_documentHandler);
-        $GLOBALS['SEEDDMS_HOOKS']['view']['editFolder'][] = new SeedDMS_FileMirror_EditFolder($this->_documentHandler);
+        $GLOBALS['SEEDDMS_HOOKS']['controller']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
+        $GLOBALS['SEEDDMS_HOOKS']['controller']['removeDocument'][] = new SeedDMS_FileMirror_RemoveDocument($this->_documentHandler);
+        $GLOBALS['SEEDDMS_HOOKS']['controller']['updateDocument'][] = new SeedDMS_FileMirror_UpdateDocument($this->_documentHandler);
+        $GLOBALS['SEEDDMS_HOOKS']['controller']['removeFolder'][] = new SeedDMS_FileMirror_RemoveFolder($this->_documentHandler);
+        $GLOBALS['SEEDDMS_HOOKS']['controller']['editFolder'][] = new SeedDMS_FileMirror_EditFolder($this->_documentHandler);
     } /* }}} */
 
     function main() { /* {{{ */
