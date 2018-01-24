@@ -141,10 +141,10 @@ class SeedDMS_FileMirror_DocumentHandler {
     }
 
     private function Attribute(){
-        if ($this->_attributObject == NULL){
-            $this->_attributObject = $this->_dms->getAttributeDefinitionByName(self::_REPOATTRIBUTE);
+        if (!$this->_attributeObject){
+            $this->_attributeObject = $this->_dms->getAttributeDefinitionByName(self::_REPOATTRIBUTE);
         }
-        return $this->_attributObject;
+        return $this->_attributeObject;
     }
 
     function addDocumentContent($document){//todo: alter content bleibt beibehalten, wenn sich Dateityp ändert
