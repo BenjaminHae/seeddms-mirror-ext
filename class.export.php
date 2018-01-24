@@ -141,8 +141,9 @@ class SeedDMS_FileMirror_DocumentHandler {
     }
 
     private function Attribute(){
+        global $dms;
         if (!$this->_attributeObject){
-            $this->_attributeObject = $this->_dms->getAttributeDefinitionByName(self::_REPOATTRIBUTE);
+            $this->_attributeObject = $dms->getAttributeDefinitionByName(self::_REPOATTRIBUTE);
         }
         return $this->_attributeObject;
     }
