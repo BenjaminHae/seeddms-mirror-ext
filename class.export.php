@@ -49,6 +49,7 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
      * $GLOBALS['SEEDDMS_HOOKS'] : all hooks added so far
      */
     function init() { /* {{{ */
+        $settings = $GLOBALS['settings']['_extensions']['export'];
         $this->_mirrorPath = '/var/local/seeddms/mirror';
         $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($this->_mirrorPath);
         $GLOBALS['SEEDDMS_HOOKS']['view']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
@@ -71,8 +72,11 @@ class SeedDMS_FileMirror_HookBase {
 }
 /* Classes for Handling Document Hooks */
 class SeedDMS_FileMirror_AddDocument extends SeedDMS_FileMirror_HookBase{
+    function preContent($view) {
+		error_log('mirror-ext: preContent');
+    }
     function postAddDocument($document) {
-		error_log('mirror-ext: tAddDocument');
+		error_log('mirror-ext: postAddDocument');
         $this->_handler->addDocumentContent($document);
     }
 }
