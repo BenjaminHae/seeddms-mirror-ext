@@ -52,7 +52,7 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
         $settings = $GLOBALS['settings']['_extensions']['export'];
         $this->_mirrorPath = '/var/local/seeddms/mirror';
         $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($this->_mirrorPath);
-        $GLOBALS['SEEDDMS_HOOKS']['controller']['postAddDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
+        $GLOBALS['SEEDDMS_HOOKS']['controller']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['removeDocument'][] = new SeedDMS_FileMirror_RemoveDocument($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['updateDocument'][] = new SeedDMS_FileMirror_UpdateDocument($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['removeFolder'][] = new SeedDMS_FileMirror_RemoveFolder($this->_documentHandler);
@@ -72,43 +72,40 @@ class SeedDMS_FileMirror_HookBase {
 }
 /* Classes for Handling Document Hooks */
 class SeedDMS_FileMirror_AddDocument extends SeedDMS_FileMirror_HookBase{
-    function preContent($view) {
-		error_log('mirror-ext: preContent');
-    }
-    function postAddDocument($document) {
+    function postAddDocument($controller, $document) {
 		error_log('mirror-ext: postAddDocument');
         $this->_handler->addDocumentContent($document);
     }
 }
 class SeedDMS_FileMirror_RemoveDocument extends SeedDMS_FileMirror_HookBase{
-    function preRemoveDocument($document) {
+    function preRemoveDocument($controller, $document) {
 		error_log('mirror-ext: preRemoveDocument');
         $this->_handler->removeDocument($document);
     }
 }
 class SeedDMS_FileMirror_UpdateDocument extends SeedDMS_FileMirror_HookBase{
-    function preUpdateDocument($document) {
+    function preUpdateDocument($controller, $document) {
 		error_log('mirror-ext: preUpdateDocument');
         //$this->_handler->removeDocument($document);
     }
-    function postUpdateDocument($document) {
+    function postUpdateDocument($controller, $document) {
 		error_log('mirror-ext: tUpdateDocument');
         //$this->_handler->removeDocument($document);
     }
 }
 /* Classes for Handling Folder Hooks */
 class SeedDMS_FileMirror_RemoveFolder extends SeedDMS_FileMirror_HookBase{
-    function preRemoveFolder($folder) {
+    function preRemoveFolder($controller, $folder) {
 		error_log('mirror-ext: preRemoveFolder');
         $this->_handler->removeFolder($folder);
     }
 }
 class SeedDMS_FileMirror_EditFolder extends SeedDMS_FileMirror_HookBase{
-    function preEditFolder($folder) {
+    function preEditFolder($controller, $folder) {
 		error_log('mirror-ext: preEditFolder');
         //$this->_handler->removeDocument($folder);
     }
-    function postEditFolder($folder) {
+    function postEditFolder($controller, $folder) {
 		error_log('mirror-ext: tEditFolder');
         //$this->_handler->removeDocument($folder);
     }
