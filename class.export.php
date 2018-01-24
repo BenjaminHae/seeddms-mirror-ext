@@ -72,33 +72,40 @@ class SeedDMS_FileMirror_HookBase {
 /* Classes for Handling Document Hooks */
 class SeedDMS_FileMirror_AddDocument extends SeedDMS_FileMirror_HookBase{
     function postAddDocument($document) {
+		error_log('mirror-ext: tAddDocument');
         $this->_handler->addDocumentContent($document);
     }
 }
 class SeedDMS_FileMirror_RemoveDocument extends SeedDMS_FileMirror_HookBase{
     function preRemoveDocument($document) {
+		error_log('mirror-ext: preRemoveDocument');
         $this->_handler->removeDocument($document);
     }
 }
 class SeedDMS_FileMirror_UpdateDocument extends SeedDMS_FileMirror_HookBase{
     function preUpdateDocument($document) {
+		error_log('mirror-ext: preUpdateDocument');
         //$this->_handler->removeDocument($document);
     }
     function postUpdateDocument($document) {
+		error_log('mirror-ext: tUpdateDocument');
         //$this->_handler->removeDocument($document);
     }
 }
 /* Classes for Handling Folder Hooks */
 class SeedDMS_FileMirror_RemoveFolder extends SeedDMS_FileMirror_HookBase{
     function preRemoveFolder($folder) {
+		error_log('mirror-ext: preRemoveFolder');
         $this->_handler->removeFolder($folder);
     }
 }
 class SeedDMS_FileMirror_EditFolder extends SeedDMS_FileMirror_HookBase{
     function preEditFolder($folder) {
+		error_log('mirror-ext: preEditFolder');
         //$this->_handler->removeDocument($folder);
     }
     function postEditFolder($folder) {
+		error_log('mirror-ext: tEditFolder');
         //$this->_handler->removeDocument($folder);
     }
 }
