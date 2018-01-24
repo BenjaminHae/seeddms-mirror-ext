@@ -134,6 +134,8 @@ class SeedDMS_FileMirror_DocumentHandler {
      */
     var $_path;
 
+    var $_attributeObject = NULL;
+
     function __construct($path){
         $this->_path = $path;
     }
