@@ -49,7 +49,7 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
      * $GLOBALS['SEEDDMS_HOOKS'] : all hooks added so far
      */
     function init() { /* {{{ */
-        $settings = $GLOBALS['settings']['_extensions']['export'];
+        //$settings = $GLOBALS['settings']['_extensions']['export']; doesn't work
         $this->_mirrorPath = '/var/local/seeddms/mirror';
         $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($this->_mirrorPath);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
