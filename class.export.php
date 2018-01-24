@@ -249,7 +249,7 @@ class SeedDMS_FileMirror_DocumentHandler {
     }
     function belongsFileToRepository($document){
         error_log(gettype($document).' '.get_class($document));
-        if ($document->getAttributeValue($this->Attribute()) == "true")
+        if (($this->Attribute() !== false) and ($document->getAttributeValue($this->Attribute()) == "true"))
             return false;
         $curr = $document->getFolder();
         return $this->belongsFolderToRepository($curr);
@@ -260,7 +260,7 @@ class SeedDMS_FileMirror_DocumentHandler {
         while (true){
             if (!$curr)
                 break;
-            if ($this->Attribute() !== false and ($curr->getAttributeValue($this->Attribute()) == "true"))
+            if (($this->Attribute() !== false) and ($curr->getAttributeValue($this->Attribute()) == "true"))
                 return false;
             if (!isset($curr->_parentID) || ($curr->_parentID == "") || ($curr->_parentID == 0) || ($curr->_id == $curr->_dms->rootFolderID)) 
                 break;
