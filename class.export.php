@@ -221,9 +221,10 @@ class SeedDMS_FileMirror_DocumentHandler {
     }
 
     function DocumentGetCorePath($document){
+        global $dms;
         $latestContent = $document->getLatestContent();
         if (is_object($latestContent))
-            return $this->_dms->contentDir.$latestContent->getPath();
+            return $dms->contentDir.$latestContent->getPath();
         else
             return false;
     }
@@ -256,13 +257,14 @@ class SeedDMS_FileMirror_DocumentHandler {
     }
 
     function belongsFolderToRepository($folder){
+        global $dms;
         $curr = $folder;
         while (true){
             if (!$curr)
                 break;
             if (($this->Attribute() !== false) and ($curr->getAttributeValue($this->Attribute()) == "true"))
                 return false;
-            if (!isset($curr->_parentID) || ($curr->_parentID == "") || ($curr->_parentID == 0) || ($curr->_id == $curr->_dms->rootFolderID)) 
+            if (!isset($curr->_parentID) || ($curr->_parentID == "") || ($curr->_parentID == 0) || ($curr->_id == $dms->rootFolderID)) 
                 break;
             $curr = $curr->getParent();
         }
