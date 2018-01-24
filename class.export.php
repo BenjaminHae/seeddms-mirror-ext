@@ -248,7 +248,7 @@ class SeedDMS_FileMirror_DocumentHandler {
         return $path;
     }
     function belongsFileToRepository($document){
-        error_log(gettype($document));
+        error_log(gettype($document).' '.get_class($document));
         if ($document->getAttributeValue($this->Attribute()) == "true")
             return false;
         $curr = $document->getFolder();
