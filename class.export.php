@@ -217,8 +217,9 @@ class SeedDMS_FileMirror_DocumentHandler {
     function DocumentGetGitFileNameX($name, $document){
         $latestContent = $document->getLatestContent();
         //Independent of case
-        if ($this->endsWith(strtolower($name), strtolower($latestContent->getFileType())))
+        if ($this->endsWith(strtolower($name), strtolower($latestContent->getFileType()))) {
             return $name;
+        }
         return $name.$latestContent->getFileType();
     }
 
@@ -229,10 +230,12 @@ class SeedDMS_FileMirror_DocumentHandler {
     function DocumentGetCorePath($document){
         global $dms;
         $latestContent = $document->getLatestContent();
-        if (is_object($latestContent))
+        if (is_object($latestContent)) {
             return $dms->contentDir.$latestContent->getPath();
-        else
+        }
+        else {
             return false;
+        }
     }
 
     function FolderGetGitFullPath($folder){
@@ -243,8 +246,9 @@ class SeedDMS_FileMirror_DocumentHandler {
         $path="";
         $folderPath = $folder->getPath();
         $start = 0;
-        if(!self::_ROOTCONTAINSMAINFOLDER)
+        if(!self::_ROOTCONTAINSMAINFOLDER) {
             $start = 1;
+        }
         for ($i = 1; $i < count($folderPath); $i++) {
             $path .= $folderPath[$i]->getName();
             if ($i + 1 < count($folderPath)){
@@ -255,8 +259,9 @@ class SeedDMS_FileMirror_DocumentHandler {
         return $path;
     }
     function belongsFileToRepository($document){
-        if (($this->Attribute() !== false) and ($document->getAttributeValue($this->Attribute()) == "true"))
+        if (($this->Attribute() !== false) && ($document->getAttributeValue($this->Attribute()) == "true")) {
             return false;
+        }
         $curr = $document->getFolder();
         return $this->belongsFolderToRepository($curr);
     }
@@ -265,12 +270,15 @@ class SeedDMS_FileMirror_DocumentHandler {
         global $dms;
         $curr = $folder;
         while (true){
-            if (!$curr)
+            if (!$curr) {
                 break;
-            if (($this->Attribute() !== false) and ($curr->getAttributeValue($this->Attribute()) == "true"))
+            }
+            if (($this->Attribute() !== false) && ($curr->getAttributeValue($this->Attribute()) == "true")) {
                 return false;
-            if (!isset($curr->_parentID) || ($curr->_parentID == "") || ($curr->_parentID == 0) || ($curr->_id == $dms->rootFolderID)) 
+            }
+            if (!isset($curr->_parentID) || ($curr->_parentID == "") || ($curr->_parentID == 0) || ($curr->_id == $dms->rootFolderID)) {
                 break;
+            }
             $curr = $curr->getParent();
         }
         return true;
@@ -278,10 +286,12 @@ class SeedDMS_FileMirror_DocumentHandler {
     private function log($msg, $priority = null){
         global $logger;
         if(trim($msg)!=""){
-            if(is_object($logger))
+            if(is_object($logger)) {
                 $logger->log("Git"." (".$_SERVER['REMOTE_ADDR'].") ".basename($_SERVER["REQUEST_URI"], ".php")." ".$msg, $priority);
-            else
+            }
+            else {
                 error_log("seeddms"."Git"." (".$_SERVER['REMOTE_ADDR'].") ".basename($_SERVER["REQUEST_URI"], ".php")." ".$msg);
+            }
         }
     }
     function forceDirectories($path){
