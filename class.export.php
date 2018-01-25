@@ -82,6 +82,7 @@ class SeedDMS_FileMirror_RemoveDocument extends SeedDMS_FileMirror_HookBase{
     }
 }
 class SeedDMS_FileMirror_UpdateDocument extends SeedDMS_FileMirror_HookBase{
+    //Todo check if filename/location/content changed
     function preUpdateDocument($controller, $document) {
         //$this->_handler->removeDocument($document);
     }
@@ -96,6 +97,7 @@ class SeedDMS_FileMirror_RemoveFolder extends SeedDMS_FileMirror_HookBase{
     }
 }
 class SeedDMS_FileMirror_EditFolder extends SeedDMS_FileMirror_HookBase{
+    //Todo check if foldername/location changed
     function preEditFolder($controller, $folder) {
         //$this->_handler->removeDocument($folder);
     }
@@ -141,7 +143,7 @@ class SeedDMS_FileMirror_DocumentHandler {
         return $this->_attributeObject;
     }
 
-    function addDocumentContent($document){//todo: alter content bleibt beibehalten, wenn sich Dateityp ändert
+    function addDocumentContent($document, $update = false){//todo: alter content bleibt beibehalten, wenn sich Dateityp ändert
         if (!$this->belongsFileToRepository($document)){
             $this->log($this->DocumentGetCorePath($document)." is set to ignoreInGit");
             return false;
@@ -152,6 +154,16 @@ class SeedDMS_FileMirror_DocumentHandler {
         if (file_exists($destinationPath)){
             $destination = $this->DocumentGetGitFullPath($document);
             $this->log("copying file ".$this->DocumentGetCorePath($document)." to ".$destination);
+            if (file_exists($destination)) {
+                if ($update) {
+                    $this->log("Removing destination file before updating");
+                    unlink($destination);
+                }
+                else {
+                    $this->log("Destination file already exists, aborting");
+                    return false;
+                }
+            }
             if (copy($this->DocumentGetCorePath($document),$destination)){
                 chmod($destination, 0770);
                 return true;
