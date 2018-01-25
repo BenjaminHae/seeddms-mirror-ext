@@ -55,6 +55,7 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
         $GLOBALS['SEEDDMS_HOOKS']['controller']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['removeDocument'][] = new SeedDMS_FileMirror_RemoveDocument($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['updateDocument'][] = new SeedDMS_FileMirror_UpdateDocument($this->_documentHandler);
+        $GLOBALS['SEEDDMS_HOOKS']['controller']['editDocument'][] = new SeedDMS_FileMirror_EditDocument($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['removeFolder'][] = new SeedDMS_FileMirror_RemoveFolder($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['editFolder'][] = new SeedDMS_FileMirror_EditFolder($this->_documentHandler);
     } /* }}} */
@@ -77,28 +78,35 @@ class SeedDMS_FileMirror_AddDocument extends SeedDMS_FileMirror_HookBase{
     }
 }
 class SeedDMS_FileMirror_RemoveDocument extends SeedDMS_FileMirror_HookBase{
-    function preRemoveDocument($controller, $document) {
+    function removeDocument($controller, $document) {
         $this->_handler->removeDocument($document);
     }
 }
+// Only updating contents
 class SeedDMS_FileMirror_UpdateDocument extends SeedDMS_FileMirror_HookBase{
-    //Todo check if filename/location/content changed
-    function preUpdateDocument($controller, $document) {
-        //$this->_handler->removeDocument($document);
-    }
     function postUpdateDocument($controller, $document) {
-        //$this->_handler->removeDocument($document);
+        $this->_handler->addDocumentContent($document, true);
     }
 }
 /* Classes for Handling Folder Hooks */
 class SeedDMS_FileMirror_RemoveFolder extends SeedDMS_FileMirror_HookBase{
-    function preRemoveFolder($controller, $folder) {
+    function removeFolder($controller, $folder) {
         $this->_handler->removeFolder($folder);
+    }
+}
+// changing metadata
+class SeedDMS_FileMirror_EditDocument extends SeedDMS_FileMirror_HookBase{
+    //Todo check if filename/location changed
+    function editDocument($controller, $document) {
+        //$this->_handler->removeDocument($document);
+    }
+    function postEditDocument($controller, $document) {
+        //$this->_handler->removeDocument($folder);
     }
 }
 class SeedDMS_FileMirror_EditFolder extends SeedDMS_FileMirror_HookBase{
     //Todo check if foldername/location changed
-    function preEditFolder($controller, $folder) {
+    function editFolder($controller, $folder) {
         //$this->_handler->removeDocument($folder);
     }
     function postEditFolder($controller, $folder) {
