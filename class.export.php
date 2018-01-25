@@ -274,7 +274,7 @@ class SeedDMS_FileMirror_DocumentHandler {
             $curr = $curr->getParent();
         }
         return true;
-    }	
+    }   
     private function log($msg, $priority = null){
         global $logger;
         if(trim($msg)!=""){
