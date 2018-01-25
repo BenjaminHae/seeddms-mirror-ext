@@ -73,40 +73,33 @@ class SeedDMS_FileMirror_HookBase {
 /* Classes for Handling Document Hooks */
 class SeedDMS_FileMirror_AddDocument extends SeedDMS_FileMirror_HookBase{
     function postAddDocument($controller, $document) {
-		error_log('mirror-ext: postAddDocument');
         $this->_handler->addDocumentContent($document);
     }
 }
 class SeedDMS_FileMirror_RemoveDocument extends SeedDMS_FileMirror_HookBase{
     function preRemoveDocument($controller, $document) {
-		error_log('mirror-ext: preRemoveDocument');
         $this->_handler->removeDocument($document);
     }
 }
 class SeedDMS_FileMirror_UpdateDocument extends SeedDMS_FileMirror_HookBase{
     function preUpdateDocument($controller, $document) {
-		error_log('mirror-ext: preUpdateDocument');
         //$this->_handler->removeDocument($document);
     }
     function postUpdateDocument($controller, $document) {
-		error_log('mirror-ext: tUpdateDocument');
         //$this->_handler->removeDocument($document);
     }
 }
 /* Classes for Handling Folder Hooks */
 class SeedDMS_FileMirror_RemoveFolder extends SeedDMS_FileMirror_HookBase{
     function preRemoveFolder($controller, $folder) {
-		error_log('mirror-ext: preRemoveFolder');
         $this->_handler->removeFolder($folder);
     }
 }
 class SeedDMS_FileMirror_EditFolder extends SeedDMS_FileMirror_HookBase{
     function preEditFolder($controller, $folder) {
-		error_log('mirror-ext: preEditFolder');
         //$this->_handler->removeDocument($folder);
     }
     function postEditFolder($controller, $folder) {
-		error_log('mirror-ext: tEditFolder');
         //$this->_handler->removeDocument($folder);
     }
 }
@@ -208,6 +201,7 @@ class SeedDMS_FileMirror_DocumentHandler {
         return $this->DocumentGetGitFileNameX($document->getName(),$document);
     }
 
+    //with file extension
     function DocumentGetGitFileNameX($name, $document){
         $latestContent = $document->getLatestContent();
         //Independent of case
@@ -241,7 +235,7 @@ class SeedDMS_FileMirror_DocumentHandler {
             $start = 1;
         for ($i = 1; $i < count($folderPath); $i++) {
             $path .= $folderPath[$i]->getName();
-            if ($i +1 < count($folderPath)){
+            if ($i + 1 < count($folderPath)){
                 $path .= "/";
             }
         }
@@ -249,7 +243,6 @@ class SeedDMS_FileMirror_DocumentHandler {
         return $path;
     }
     function belongsFileToRepository($document){
-        error_log(gettype($document).' '.get_class($document));
         if (($this->Attribute() !== false) and ($document->getAttributeValue($this->Attribute()) == "true"))
             return false;
         $curr = $document->getFolder();
