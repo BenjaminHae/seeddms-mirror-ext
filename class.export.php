@@ -144,6 +144,7 @@ class SeedDMS_FileMirror_DocumentHandler {
     var $_attributeObject = NULL;
 
     function __construct($path){
+        $this->log("extension init");
         $this->_path = rtrim($path,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
     }
 
