@@ -22,6 +22,10 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+//ToDo implement edit of document/folder, handle change of ignore Attribute
+// handle settings
+// change of filetype by reuploading
+// logging
 
 /**
  * Extension to export files into a directory structure
@@ -140,7 +144,7 @@ class SeedDMS_FileMirror_DocumentHandler {
     var $_attributeObject = NULL;
 
     function __construct($path){
-        $this->_path = $path;
+        $this->_path = rtrim($path,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
     }
 
     private function Attribute(){
