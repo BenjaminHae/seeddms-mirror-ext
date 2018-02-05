@@ -37,8 +37,6 @@
 class SeedDMS_FileMirror extends SeedDMS_ExtBase {
 
     var $_documentHandler;
-    var $_mirrorPath;
-
     /**
      * Initialization
      *
@@ -53,9 +51,13 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
      * $GLOBALS['SEEDDMS_HOOKS'] : all hooks added so far
      */
     function init() { /* {{{ */
-        //$settings = $GLOBALS['settings']['_extensions']['export']; doesn't work
-        $this->_mirrorPath = '/var/local/seeddms/mirror';
-        $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($this->_mirrorPath);
+        if (array_key_exists('export', $GLOBALS['settings'])) {
+            $settings = $GLOBALS['settings']->_extensions['export'];
+        }
+        else {
+            $settings = array('mirrorPath' => '/var/local/seeddms/mirror');
+        }
+        $this->_documentHandler = new SeedDMS_FileMirror_DocumentHandler($settings['mirrorPath']);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['addDocument'][] = new SeedDMS_FileMirror_AddDocument($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['removeDocument'][] = new SeedDMS_FileMirror_RemoveDocument($this->_documentHandler);
         $GLOBALS['SEEDDMS_HOOKS']['controller']['updateDocument'][] = new SeedDMS_FileMirror_UpdateDocument($this->_documentHandler);
