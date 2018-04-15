@@ -51,7 +51,7 @@ class SeedDMS_FileMirror extends SeedDMS_ExtBase {
      * $GLOBALS['SEEDDMS_HOOKS'] : all hooks added so far
      */
     function init() { /* {{{ */
-        if (array_key_exists('export', $GLOBALS['settings'])) {
+        if (array_key_exists('export', $GLOBALS['settings']->_extensions)) {
             $settings = $GLOBALS['settings']->_extensions['export'];
         }
         else {
