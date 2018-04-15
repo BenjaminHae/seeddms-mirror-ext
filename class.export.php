@@ -80,10 +80,8 @@ class SeedDMS_FileMirror_HookBase {
 /* Classes for Handling Document Hooks */
 class SeedDMS_FileMirror_AddDocument extends SeedDMS_FileMirror_HookBase{
     function addDocument($controller, $document) {
-        error_log('add');
     }
     function postAddDocument($controller, $document) {
-        error_log('postAdd');
         $this->_handler->addDocumentContent($document);
     }
 }
@@ -150,7 +148,6 @@ class SeedDMS_FileMirror_DocumentHandler {
     var $_attributeObject = NULL;
 
     function __construct($path){
-        $this->log("extension init");
         $this->_path = rtrim($path,DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR;
     }
 
