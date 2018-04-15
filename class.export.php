@@ -199,6 +199,7 @@ class SeedDMS_FileMirror_DocumentHandler {
             $this->log($this->DocumentGetCorePath($document)." is set to ignoreInGit");
             return false;
         }
+        $this->log("unlinking ".$this->DocumentGetGitFullPath($document));
         unlink($this->DocumentGetGitFullPath($document));
         return true;
     }
